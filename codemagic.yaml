@@ -1,0 +1,45 @@
+workflows:
+  ios-unsigned-test:
+    name: iOS unsigned test build
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      node: 22
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Install npm dependencies
+        script: npm ci || npm install
+
+      - name: Generate native iOS project
+        script: npx expo prebuild --platform ios --clean
+
+      - name: Point Xcode at the correct Node binary
+        script: |
+          echo "export NODE_BINARY=$(command -v node)" > ios/.xcode.env.local
+          cat ios/.xcode.env.local
+          node --version
+
+      - name: Install CocoaPods
+        script: |
+          cd ios
+          pod install
+
+      - name: Build unsigned iOS app
+        script: |
+          cd ios
+          WORKSPACE=$(ls -d *.xcworkspace | head -1)
+          SCHEME="${WORKSPACE%.xcworkspace}"
+          echo "Workspace: $WORKSPACE"
+          echo "Scheme:    $SCHEME"
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+    artifacts:
+      - ios/build/Build/Products/Release-iphonesimulator/*.app
+      - /tmp/xcodebuild_logs/*.log
