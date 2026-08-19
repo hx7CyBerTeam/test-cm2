@@ -55,7 +55,7 @@ workflows:
             --create
           keychain initialize
           keychain add-certificates
-          xcode-project use-profiles
+          xcode-project use-profiles --project "ios/cmtest2.xcodeproj"
 
       - name: Build ipa
         script: |
