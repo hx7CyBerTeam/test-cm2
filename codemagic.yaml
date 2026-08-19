@@ -37,9 +37,6 @@ workflows:
       node: 22
       xcode: latest
       cocoapods: default
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: ink.raze.app
     scripts:
       - name: Install npm dependencies
         script: npm ci || npm install
@@ -52,7 +49,13 @@ workflows:
           echo "export NODE_BINARY=$(command -v node)" > ios/.xcode.env.local
 
       - name: Set up signing
-        script: xcode-project use-profiles
+        script: |
+          app-store-connect fetch-signing-files "ink.raze.app" \
+            --type IOS_APP_STORE \
+            --create
+          keychain initialize
+          keychain add-certificates
+          xcode-project use-profiles
 
       - name: Build ipa
         script: |
