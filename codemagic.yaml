@@ -18,10 +18,14 @@ workflows:
         script: |
           echo "export NODE_BINARY=$(command -v node)" > ios/.xcode.env.local
 
+      - name: Install CocoaPods
+        script: |
+          cd ios && pod install
+
       - name: Build unsigned
         script: |
           xcode-project build-ipa \
-            --project "ios/cmtest2.xcodeproj" \
+            --workspace "ios/cmtest2.xcworkspace" \
             --scheme "cmtest2" \
             -- CODE_SIGNING_ALLOWED=NO
     artifacts:
@@ -48,6 +52,10 @@ workflows:
         script: |
           echo "export NODE_BINARY=$(command -v node)" > ios/.xcode.env.local
 
+      - name: Install CocoaPods
+        script: |
+          cd ios && pod install
+
       - name: Set up signing
         script: |
           openssl genrsa -out /tmp/cert_key.pem 2048
@@ -62,7 +70,7 @@ workflows:
       - name: Build ipa
         script: |
           xcode-project build-ipa \
-            --project "ios/cmtest2.xcodeproj" \
+            --workspace "ios/cmtest2.xcworkspace" \
             --scheme "cmtest2"
     artifacts:
       - build/ios/ipa/*.ipa
