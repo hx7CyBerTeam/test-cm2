@@ -50,8 +50,10 @@ workflows:
 
       - name: Set up signing
         script: |
+          openssl genrsa -out /tmp/cert_key.pem 2048
           app-store-connect fetch-signing-files "ink.raze.app" \
             --type IOS_APP_STORE \
+            --certificate-key=@file:/tmp/cert_key.pem \
             --create
           keychain initialize
           keychain add-certificates
